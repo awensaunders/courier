@@ -88,8 +88,8 @@ func (h *handler) receiveMessage(ctx context.Context, channel courier.Channel, w
 	if from == "" {
 		return nil, handlers.WriteAndLogRequestError(ctx, h, channel, w, r, fmt.Errorf("must have one of 'sender' or 'from' set"))
 	}
-	if text == "" {
-		return nil, handlers.WriteAndLogRequestError(ctx, h, channel, w, r, fmt.Errorf("must have 'text' set"))
+	if text == "" && len(r.Form["attachments"]) == 0 {
+		return nil, handlers.WriteAndLogRequestError(ctx, h, channel, w, r, fmt.Errorf("must have 'text' set or have an attachment"))
 	}
 
 	// if we have a date, parse it
