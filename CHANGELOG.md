@@ -1,3 +1,96 @@
+v6.4.0
+----------
+ * 6.4.0 Release Candidate
+
+v6.3.5
+----------
+ * up max request size to 1M
+
+v6.3.4
+----------
+ * Include filename when sending WhatsApp attachments
+
+v6.3.3
+----------
+ * Support using namespace from the template translation
+ * Add is_resend to Msg payload to allow for resending messages manually
+
+v6.3.2
+----------
+ * Do not verify the SSL certificate for Bongo Live
+
+v6.3.1
+----------
+ * Update BL to remove UDH parameter and use HTTPS URL
+
+v6.2.2
+----------
+ * Handle whatsapp URNs sent to Twiml handler without prefix
+ * Add support for Zenvia SMS
+
+v6.2.1
+----------
+ * Add support for Zenvia WhatsApp
+
+v6.2.0
+----------
+ * Add handling for button whatsapp message type
+ * Bump CI testing to PG 11 and 12
+ * Add Kaleyra channel type
+ * 6.2.0 RC
+
+v6.1.7
+----------
+ * switch id to bigserial
+
+v6.1.6
+----------
+ * Cache media upload failures localy for 15m
+
+v6.1.5
+----------
+ * include header when sanitizing request/response
+
+v6.1.4
+----------
+ * Cleanup of whatsapp media handling
+ * Detect media type for uploading media
+
+v6.1.3
+----------
+ * Better logging of error cases when uploading WhatsApp media
+
+v6.1.2
+----------
+ * use url.parse to build media URL
+
+v6.1.1
+----------
+ * Add TextIt WhatsApp channel type
+
+v6.1.0
+----------
+ * Check and log errors when building URLs for sending
+
+v6.0.0
+----------
+ * Update README
+
+v5.7.12
+----------
+ * URN channel change only for channels with SEND role
+ * Update to gocommon v1.6.1
+ * Add RocketChat handler
+ * Add discord handler
+
+v5.7.11
+----------
+ * Cache media ids for WhatsApp attachments
+
+v5.7.10
+----------
+ * Support receiving Multipart form data requests for EX channels
+
 v5.7.9
 ----------
  * Update to latest gocommon 1.5.3 and golang 1.15

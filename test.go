@@ -7,13 +7,14 @@ import (
 	"fmt"
 	"log"
 	"strconv"
+	"strings"
 	"sync"
 	"time"
 
 	"github.com/nyaruka/gocommon/urns"
 	"github.com/nyaruka/gocommon/uuids"
 
-	"github.com/garyburd/redigo/redis"
+	"github.com/gomodule/redigo/redis"
 	_ "github.com/lib/pq" // postgres driver
 )
 
@@ -150,11 +151,19 @@ func (mb *MockBackend) PopNextOutgoingMsg(ctx context.Context) (Msg, error) {
 }
 
 // WasMsgSent returns whether the passed in msg was already sent
-func (mb *MockBackend) WasMsgSent(ctx context.Context, msg Msg) (bool, error) {
+func (mb *MockBackend) WasMsgSent(ctx context.Context, id MsgID) (bool, error) {
 	mb.mutex.Lock()
 	defer mb.mutex.Unlock()
 
-	return mb.sentMsgs[msg.ID()], nil
+	return mb.sentMsgs[id], nil
+}
+
+func (mb *MockBackend) ClearMsgSent(ctx context.Context, id MsgID) error {
+	mb.mutex.Lock()
+	defer mb.mutex.Unlock()
+
+	delete(mb.sentMsgs, id)
+	return nil
 }
 
 // IsMsgLoop returns whether the passed in msg is a loop
@@ -389,6 +398,7 @@ type MockChannel struct {
 	schemes     []string
 	address     ChannelAddress
 	country     string
+	role        string
 	config      map[string]interface{}
 	orgConfig   map[string]interface{}
 }
@@ -500,6 +510,30 @@ func (c *MockChannel) OrgConfigForKey(key string, defaultValue interface{}) inte
 	return value
 }
 
+// SetRoles sets the role on the channel
+func (c *MockChannel) SetRoles(roles []ChannelRole) {
+	c.role = fmt.Sprint(roles)
+}
+
+// Roles returns the roles of this channel
+func (c *MockChannel) Roles() []ChannelRole {
+	roles := []ChannelRole{}
+	for _, char := range strings.Split(c.role, "") {
+		roles = append(roles, ChannelRole(char))
+	}
+	return roles
+}
+
+// HasRole returns whether the passed in channel supports the passed role
+func (c *MockChannel) HasRole(role ChannelRole) bool {
+	for _, r := range c.Roles() {
+		if r == role {
+			return true
+		}
+	}
+	return false
+}
+
 // NewMockChannel creates a new mock channel for the passed in type, address, country and config
 func NewMockChannel(uuid string, channelType string, address string, country string, config map[string]interface{}) *MockChannel {
 	cUUID, _ := NewChannelUUID(uuid)
@@ -511,6 +545,7 @@ func NewMockChannel(uuid string, channelType string, address string, country str
 		address:     ChannelAddress(address),
 		country:     country,
 		config:      config,
+		role:        "SR",
 		orgConfig:   map[string]interface{}{},
 	}
 	return channel
@@ -537,6 +572,7 @@ type mockMsg struct {
 	responseToExternalID string
 	metadata             json.RawMessage
 	alreadyWritten       bool
+	isResend             bool
 
 	receivedOn *time.Time
 	sentOn     *time.Time
@@ -561,6 +597,7 @@ func (m *mockMsg) Topic() string                { return m.topic }
 func (m *mockMsg) ResponseToID() MsgID          { return m.responseToID }
 func (m *mockMsg) ResponseToExternalID() string { return m.responseToExternalID }
 func (m *mockMsg) Metadata() json.RawMessage    { return m.metadata }
+func (m *mockMsg) IsResend() bool               { return m.isResend }
 
 func (m *mockMsg) ReceivedOn() *time.Time { return m.receivedOn }
 func (m *mockMsg) SentOn() *time.Time     { return m.sentOn }
